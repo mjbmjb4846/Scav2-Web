@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scavenger Hunt Field Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Leaflet & Protomaps for Static PMTiles rendering -->
+    <link href="https://unpkg.com/maplibre-gl@^5.24.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@^5.24.0/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/pmtiles@3.2.0/dist/pmtiles.js"></script>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Field Guide</h1>
+        <div id="gameState" class="status-badge">Connecting...</div>
+        <button id="refreshBtn" onclick="refreshData()" class="refresh-btn">🔄 Refresh</button>
+    </header>
+
+    <!-- Auth -->
+    <div id="authPanel" class="panel hidden">
+        <h2>Enlist in the Hunt</h2>
+        <input type="text" id="playerName" placeholder="Your Alias">
+        <input type="text" id="teamName" placeholder="Team Name">
+        <input type="text" id="discordId" placeholder="Discord User ID (Optional)">
+        <button onclick="joinGame()">Join / Login</button>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="panel hidden" style="border-color: var(--accent);">
+        <h2>Admin Controls</h2>
+        <div style="margin-bottom: 10px;">
+            <h3>Start / Schedule Game</h3>
+            <label>Start Time (leave blank for immediate): <input type="datetime-local" id="adminStartTime"></label>
+            <label>End Time (optional): <input type="datetime-local" id="adminEndTime"></label>
+            <label><input type="checkbox" id="adminResetTeams"> Reset Teams & Scores</label>
+            <label>Upload Challenges CSV: <input type="file" id="adminCsv" accept=".csv"></label>
+            <label>Inventory Slots: <input type="number" id="adminInvSlots" value="3" style="width:60px;"></label>
+            <label>Inv. Value Boost/min: <input type="number" step="0.01" id="adminInvInc" value="0.007" style="width:80px;"></label>
+            <label>Random Claim Boost: <input type="number" step="0.01" id="adminRandVal" value="0.40" style="width:80px;"></label>
+            <br><button onclick="adminStartGame()" style="background: var(--green);">🟢 Start / Schedule Game</button>
+        </div>
+        <div style="border-top: 1px dashed var(--border); padding-top: 10px; margin-bottom: 10px;">
+            <h3>Stop / Resume Game</h3>
+            <label>End Time (leave blank for immediate): <input type="datetime-local" id="adminStopEndTime"></label>
+            <br><button onclick="adminStopGame()" style="background: var(--accent);">🔴 Stop Game</button>
+            <button onclick="adminResumeGame()" style="background: var(--green);">🟢 Resume Game</button>
+        </div>
+        <div style="border-top: 1px dashed var(--border); padding-top: 10px; margin-bottom: 10px;">
+            <h3>Shuffle Teams</h3>
+            <label>Number of Teams: <input type="number" id="adminTeamCount" value="2" style="width:60px;"></label>
+            <button onclick="adminShuffleTeams()" style="background: var(--ink);">🎲 Shuffle Teams</button>
+        </div>
+        <div style="border-top: 1px dashed var(--border); padding-top: 10px; margin-bottom: 10px;">
+            <h3>Create Challenge</h3>
+            <input type="text" id="newChalName" placeholder="Challenge Name">
+            <input type="text" id="newChalDesc" placeholder="Description">
+            <input type="text" id="newChalCat" placeholder="Category (e.g. Photo, Text, GPS)">
+            <label>Points: <input type="number" id="newChalPts" style="width:80px;" value="10"></label>
+            <label>Claim Limit (-1 for infinite): <input type="number" id="newChalLimit" style="width:80px;" value="-1"></label><br>
+            <label>Latitude (optional): <input type="number" step="any" id="newChalLat" style="width:120px;"></label>
+            <label>Longitude (optional): <input type="number" step="any" id="newChalLng" style="width:120px;"></label>
+            <br><button onclick="adminCreateChallenge()" style="background: var(--green);">➕ Create Challenge</button>
+        </div>
+        <div style="border-top: 1px dashed var(--border); padding-top: 10px; text-align: right;">
+            <button onclick="logoutLocally()" style="background: transparent; color: var(--ink); border-color: var(--ink);">Log Out Admin</button>
+        </div>
+    </div>
+
+    <!-- Team Info -->
+    <div id="teamPanel" class="panel hidden">
+        <h2>Team: <span id="teamNameDisplay"></span></h2>
+        <p><strong>Score:</strong> <span id="teamScore" style="color:var(--accent); font-size: 1.2em; font-weight:bold;">0</span> pts</p>
+        <p><strong>Members:</strong> <span id="teamMembers"></span></p>
+        <button onclick="renameTeamPrompt()">Rename Team</button>
+        <button onclick="renamePlayerPrompt()">Rename Player</button>
+        <button onclick="linkDiscordPrompt()">Link Discord</button>
+        <button onclick="leaveGame()" style="background: var(--accent);">Desert Team</button>
+        
+        <h3 style="margin-top: 20px;">🎒 Inventory</h3>
+        <div id="inventoryList"></div>
+        <button onclick="addRandomInventory()">🎲 Request Random Drop (+40%)</button>
+    </div>
+
+    <!-- Podium Panel -->
+    <div id="podiumPanel" class="panel hidden" style="text-align: center; border-color: #d4af37; border-width: 4px;">
+        <h2>🏆 OPERATION CONCLUDED 🏆</h2>
+        <div id="podiumGraph" class="podium-container"></div>
+        <div id="podiumList" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Challenges -->
+    <div class="panel">
+        <h2 style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Active Bounties</span>
+            <button id="mapToggleBtn" onclick="toggleMap()" style="font-size: 0.6em; padding: 5px 10px;">🗺️ Show Map</button>
+        </h2>
+        <div id="challengeFilters" style="margin-bottom: 15px;">
+            <input type="text" id="searchFilter" placeholder="Search bounties..." onkeyup="renderChallenges()">
+        </div>
+        <div id="mapContainer" class="hidden" style="width: 100%; height: 400px; border: 2px solid var(--border); margin-bottom: 15px; z-index: 1;"></div>
+        <div id="challengesList" class="challenge-grid"></div>
+    </div>
+</div>
+
+<!-- Modals -->
+<div id="claimModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Claim Bounty</h2>
+        <p id="claimModalDesc"></p>
+        <input type="hidden" id="claimChallengeId">
+        <div id="mediaInputContainer" class="hidden">
+            <label><strong>Required Evidence (Photo/Video):</strong></label><br>
+            <input title="Photo/Video" type="file" id="claimMedia" accept="image/*,video/*" style="margin-top:10px;">
+        </div>
+        <br>
+        <button onclick="submitClaim()">Submit Evidence</button>
+        <button onclick="closeModal()" style="background: transparent; color: var(--ink);">Cancel</button>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

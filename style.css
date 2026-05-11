@@ -1,0 +1,149 @@
+:root {
+    --bg: #ece5ce;
+    --ink: #2b2621;
+    --accent: #8b3a3a;
+    --border: #4a3b32;
+    --paper: #f5f0e1;
+    --green: #2e6b3c;
+}
+body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: 'Special Elite', monospace;
+    margin: 0;
+    padding: 10px;
+    background-image: url('https://www.transparenttextures.com/patterns/worn-dots.png');
+    line-height: 1.4;
+}
+.container { max-width: 800px; margin: 0 auto; }
+header {
+    text-align: center;
+    border-bottom: 3px double var(--border);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+h1 { margin: 0; font-size: 2.5em; text-transform: uppercase; letter-spacing: 2px; }
+.status-badge {
+    display: inline-block; padding: 5px 10px; border: 2px solid var(--border);
+    font-weight: bold; background: var(--paper);
+}
+.refresh-btn {
+    margin-left: 10px; font-size: 0.8em; padding: 5px 10px;
+}
+.panel {
+    background: var(--paper);
+    border: 2px solid var(--border);
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 5px 5px 0px var(--border);
+    position: relative;
+}
+.panel::before {
+    content: '';
+    position: absolute; top: -5px; left: 10px; width: 30px; height: 15px;
+    background: rgba(0,0,0,0.1); transform: rotate(-5deg);
+}
+
+h2 { border-bottom: 2px dashed var(--border); padding-bottom: 5px; margin-top: 0;}
+button {
+    background: var(--ink); color: var(--bg);
+    border: 2px solid var(--ink); padding: 8px 15px;
+    font-family: inherit; cursor: pointer; font-size: 1em;
+    transition: all 0.2s; margin: 5px; text-transform: uppercase;
+}
+button:hover { background: var(--accent); border-color: var(--accent); transform: translate(-2px, -2px); box-shadow: 3px 3px 0 var(--border); }
+button:active { transform: translate(0, 0); box-shadow: 0 0 0 var(--border); }
+
+input[type="text"], input[type="file"] {
+    background: transparent; border: none; border-bottom: 2px solid var(--border);
+    color: var(--ink); font-family: inherit; font-size: 1.1em;
+    padding: 5px; width: 100%; box-sizing: border-box; margin-bottom: 10px;
+    outline: none;
+}
+input[type="datetime-local"], input[type="number"] {
+    font-family: inherit; color: var(--ink); background: transparent; border: 1px solid var(--border); padding: 3px;
+}
+input[type="text"]:focus { border-bottom-color: var(--accent); }
+
+.challenge-grid { display: grid; gap: 15px; grid-template-columns: 1fr; }
+@media (min-width: 600px) { .challenge-grid { grid-template-columns: 1fr 1fr; } }
+
+.card {
+    border: 2px solid var(--border); padding: 10px; background: #fff;
+    position: relative;
+    display: flex; flex-direction: column; justify-content: space-between;
+}
+.card.claimed { border-color: var(--green); background: #eef7f1; }
+.card.exhausted { border-color: var(--accent); background: #fdf0f0; opacity: 0.7;}
+.card.blacklisted { border-color: #666; background: #eee; opacity: 0.5; }
+.card h3 { margin: 0 0 10px 0; font-size: 1.2em; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;}
+.pts { font-weight: bold; color: var(--accent); white-space: nowrap; }
+
+.tag { font-size: 0.8em; padding: 2px 5px; border: 1px solid var(--border); background: var(--bg); margin-right: 5px;}
+
+.inv-item { border-left: 4px solid var(--accent); padding-left: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.03); padding: 5px;}
+
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center;
+    z-index: 100;
+}
+.modal-content {
+    background: var(--paper); border: 4px solid var(--border);
+    padding: 20px; width: 90%; max-width: 400px;
+    box-shadow: 10px 10px 0 var(--border);
+}
+.hidden { display: none !important; }
+
+/* Podium */
+.podium-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 10px;
+    height: 250px;
+    margin: 20px 0;
+    border-bottom: 3px solid var(--border);
+    padding-bottom: 5px;
+}
+.podium-bar {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    color: var(--bg);
+    font-weight: bold;
+    text-shadow: 1px 1px 0 var(--ink);
+    transition: height 0.5s;
+    padding-bottom: 5px;
+}
+.podium-bar.gold { background: #d4af37; border: 2px solid var(--ink); }
+.podium-bar.silver { background: #c0c0c0; border: 2px solid var(--ink); }
+.podium-bar.bronze { background: #cd7f32; border: 2px solid var(--ink); }
+.podium-label { margin-top: 10px; font-size: 0.9em; color: var(--ink); font-weight: bold; word-wrap: break-word; width: 100%;}
+
+/* Map Overrides */
+#mapContainer.hidden { display: none !important; }
+.leaflet-container { font-family: 'Special Elite', monospace; background: #dcd3b6; } /* Darkened slightly so white roads and light buildings pop */
+.leaflet-tile-pane { filter: contrast(1.1) sepia(0.1); } /* Vintage paper effect */
+.map-marker {
+    background-color: var(--paper); border: 2px solid var(--ink); border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    font-weight: bold; color: var(--accent); cursor: pointer;
+    box-shadow: 2px 2px 0 var(--border); font-size: 0.9em;
+    font-family: 'Special Elite', monospace;
+}
+.map-marker.claimed { border-color: var(--green); color: var(--green); background: #eef7f1; }
+.map-marker.exhausted { border-color: var(--accent); background: #fdf0f0; opacity: 0.7; }
+.map-marker.blacklisted { border-color: #666; background: #eee; opacity: 0.5; color: #666; }
+.leaflet-popup-content-wrapper {
+    background: var(--paper); border: 2px solid var(--border); border-radius: 0;
+    box-shadow: 5px 5px 0 var(--border); color: var(--ink);
+}
+.leaflet-popup-tip {
+    background: var(--paper); border: 2px solid var(--border);
+    border-bottom: none; border-right: none; box-shadow: none;
+}
+.leaflet-popup-content { margin: 12px; }
+.leaflet-popup-close-button { display: none; }
