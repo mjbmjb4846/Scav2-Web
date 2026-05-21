@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rules & Strategy - Scavenger Hunt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .rules-content {
+            background: var(--paper, #f4f1ea);
+            padding: 20px;
+            border: 2px solid var(--border, #8c8c8c);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .rules-content h2 {
+            border-bottom: 1px dashed var(--border, #8c8c8c);
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+        .rules-content ul {
+            padding-left: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 10px;
+        }
+        .nav-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: var(--ink, #2b2b2b);
+            font-weight: bold;
+        }
+        .nav-link:hover {
+            color: var(--accent, #d32f2f);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Field Guide Rules</h1>
+        <a href="index.html" class="nav-link">← Back to Bounties</a>
+    </header>
+
+    <div class="rules-content">
+        <h2>1. Getting Started</h2>
+        <p>Welcome to the Scavenger Hunt! To begin your operation, you'll need to <strong>Enlist in the Hunt</strong> from the main page.</p>
+        <ul>
+            <li><strong>Alias:</strong> Choose your personal player name.</li>
+            <li><strong>Team Name:</strong> Join an existing team by typing their exact name, or create a new one! Work together with your team to maximize your score.</li>
+            <li><strong>Discord Link (Optional):</strong> If you want to use Discord bot commands alongside the web app, enter your numeric Discord User ID. You can also link this later from your Team Panel.</li>
+        </ul>
+
+        <h2>2. Bounties (Challenges)</h2>
+        <p>The core of the game is completing <strong>Bounties</strong> scattered throughout the map. Each bounty has a point value, a category, and a description of what you need to do.</p>
+        <ul>
+            <li><strong>Availability:</strong> Some bounties are infinite, while others have a strict claim limit across the entire game (e.g., "1 remaining"). Once a bounty is exhausted, no one else can claim it!</li>
+            <li><strong>Categories:</strong> Pay attention to the category (e.g., Photo, Video, Text). If a bounty requires a Photo or Video, you'll be prompted to upload evidence when claiming.</li>
+            <li><strong>Map View:</strong> Toggle the map view on the main page to see where location-based bounties are hiding.</li>
+        </ul>
+
+        <h2>3. Claiming Points</h2>
+        <p>When you've completed a bounty's objective, hit the <strong>Claim</strong> button. If required, upload your photo or video evidence. Once submitted, your team's score will instantly increase!</p>
+        <p><em>Mistake?</em> If you claimed something by accident, you can <strong>Undo Claim</strong>. This will move the bounty into your team's inventory instead of erasing it completely.</p>
+
+        <h2>4. Your Inventory (Backpack Mechanics)</h2>
+        <p>The Inventory is where strategy comes into play. Instead of claiming a bounty immediately, you can <strong>Stow</strong> it in your inventory.</p>
+        <ul>
+            <li><strong>Growing Value:</strong> While a bounty is stowed in your inventory, its point value steadily increases every minute! The longer you hold it before completing and claiming it, the more it's worth.</li>
+            <li><strong>Capacity Limit:</strong> Your team can only hold a limited number of bounties at a time (usually 3 slots).</li>
+            <li><strong>Random Drops (indicated by 🎲):</strong> You can request a <em>Random Drop</em> from your Team Panel. The system will assign you a random available bounty, and as a reward for the uncertainty, it instantly gets a massive point boost (typically +40%) on top of the base value!</li>
+            <li><strong>Dropping Items:</strong> If you Stow a bounty but realize you can't complete it, you can <strong>Drop</strong> it to free up an inventory slot. <strong>Warning:</strong> Dropping a bounty permanently blacklists it for your team. You will never be able to claim it again!</li>
+        </ul>
+
+        <h2>5. Winning the Operation</h2>
+        <p>Keep an eye on the <strong>Operation Status</strong> at the top of the screen. When the game ends, the podium will be revealed! <em>Note: Scores may be hidden on the main leaderboard during the final stretch of the game to build suspense.</em></p>
+
+        <h2>Quick Strategy Guide</h2>
+        <ul>
+            <li><strong>Always be Stowing:</strong> Never leave your inventory empty. Stow high-value bounties early so they accumulate bonus points while you work on other tasks.</li>
+            <li><strong>Embrace the Random:</strong> If you don't know what to do next, request a Random Drop. The instant point boost makes even low-value bounties worth completing.</li>
+            <li><strong>Divide and Conquer:</strong> Coordinate with your team. Since you share the same inventory and score, make sure you aren't all traveling to the same low-point bounty when you could be splitting up to cover more ground.</li>
+            <li><strong>Watch the Limits:</strong> Keep an eye on high-value bounties with limited claims. If another team grabs it before you, you lose the opportunity!</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>
