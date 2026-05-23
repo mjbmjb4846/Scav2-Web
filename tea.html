@@ -478,7 +478,7 @@
             screenStatus.innerText = "TRANSMISSION COMPLETE";
             screenOutput.innerHTML = `Your Order:<br><span style="color:#ffd166">${finalDrinkStr}</span>`;
 
-            const halfHourLock = Date.now() + (30 * 60 * 1000);
+            const halfHourLock = Date.now() + (120 * 60 * 1000);
             localStorage.setItem('boba_oracle_lock', halfHourLock);
             localStorage.setItem('boba_oracle_drink', finalDrinkStr);
             
