@@ -166,11 +166,8 @@ async function loadTeamInfo() {
             document.getElementById('teamMembers').innerText = (t.members || []).map(m => m.name).join(', ');
         }
     } else if (res.status === 404) {
-        // If the server no longer knows this team, drop only the stale team cache.
-        localStorage.removeItem('scav_team');
-        document.getElementById('teamNameDisplay').innerText = 'No team';
-        document.getElementById('teamScore').innerText = '0';
-        document.getElementById('teamMembers').innerText = '';
+        // If the server no longer knows this team, clear the stale session entirely.
+        logoutLocally();
     } else if (res.status === 401 || res.status === 403) {
         // Only logout if explicitly unauthorized, stopping network hiccups from wiping tokens
         logoutLocally();
