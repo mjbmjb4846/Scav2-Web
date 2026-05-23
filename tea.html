@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ding Tea Challenge</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Space+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #fceade;
+            --machine-color: #ffb5b5;
+            --accent-color: #ff6f61;
+            --dark-color: #4a2c2a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--machine-color) 1px, transparent 0);
+            background-size: 20px 20px;
+            font-family: 'Space Mono', monospace;
+            color: var(--dark-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 6vw;
+            @media (min-width: 600px) { font-size: 2.5rem; }
+            color: var(--accent-color);
+            text-shadow: 3px 3px 0px var(--dark-color);
+            margin-bottom: 4px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.75rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: var(--dark-color);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 4px;
+        }
+
+        .oracle-container {
+            background: #fff;
+            border: 6px solid var(--dark-color);
+            border-radius: 24px;
+            box-shadow: 8px 8px 0px var(--dark-color);
+            width: 100%;
+            max-width: 380px;
+            padding: 20px 15px 15px 15px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pointer {
+            position: absolute;
+            top: 5px;
+            z-index: 10;
+            width: 0; 
+            height: 0; 
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 20px solid var(--accent-color);
+            filter: drop-shadow(0px 3px 0px var(--dark-color));
+        }
+
+        .wheel-box {
+            position: relative;
+            width: 80vw;
+            height: 80vw;
+            max-width: 300px;
+            max-height: 300px;
+            margin: 10px 0 15px 0;
+            border-radius: 50%;
+            border: 6px solid var(--dark-color);
+            overflow: hidden;
+            background: #fff;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .wheel-box.disabled {
+            cursor: not-allowed;
+        }
+
+        .wheel {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transform-origin: center center;
+        }
+
+        #tea-wheel {
+            z-index: 2;
+        }
+
+        #topping-wheel {
+            z-index: 3;
+            width: 56%;
+            height: 56%;
+            top: 22%;
+            left: 22%;
+            border: 4px solid var(--dark-color);
+            background: #fff;
+        }
+
+        .wheel.spinning-tea {
+            transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1) !important;
+        }
+
+        .wheel.spinning-topping {
+            transition: transform 3.5s cubic-bezier(0.1, 0.8, 0.1, 1) !important;
+        }
+
+        .center-peg {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: var(--dark-color);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Control Panel Container for Buttons underneath the Wheel Frame */
+        .control-panel {
+            align-self: fill;
+            width: 100%;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 0 5px;
+        }
+
+        .caffeine-btn, .quick-btn {
+            background: #eee;
+            border: 2px solid var(--dark-color);
+            color: var(--dark-color);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+            flex: 1;
+            text-align: center;
+        }
+
+        .caffeine-btn.active {
+            background: #ff3333;
+            color: #fff;
+        }
+
+        .quick-btn {
+            background: #06d6a0;
+            color: var(--dark-color);
+        }
+
+        .quick-btn:active:not(:disabled) {
+            transform: translateY(2px);
+        }
+
+        .caffeine-btn:disabled, .quick-btn:disabled {
+            background: #ccc;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .display-screen {
+            background: #222;
+            color: #3f0;
+            width: 100%;
+            min-height: 95px;
+            border-radius: 8px;
+            border: 4px solid var(--dark-color);
+            padding: 10px;
+            font-family: 'Space Mono', monospace;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screen-title {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .screen-text {
+            font-weight: bold;
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+
+        #timer {
+            color: #ff3333;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>A Spontaneous Boba</h1>
+    <div class="subtitle">Ding Tea Challenge</div>
+
+    <div class="oracle-container">
+        <div class="pointer"></div>
+        
+        <div id="interactive-trigger" class="wheel-box">
+            <div id="tea-wheel" class="wheel"><canvas id="canvas-tea"></canvas></div>
+            <div id="topping-wheel" class="wheel"><canvas id="canvas-topping"></canvas></div>
+            <div class="center-peg"></div>
+        </div>
+
+        <div class="control-panel">
+            <button id="caffeine-toggle" class="caffeine-btn">Limit Caffeine: OFF</button>
+            <button id="quick-draw-btn" class="quick-btn">Quick Draw</button>
+        </div>
+
+        <div class="display-screen">
+            <div class="screen-title" id="screen-status">Wheel Ready</div>
+            <div class="screen-text" id="screen-output">Tap the wheel to spin!</div>
+            <div id="timer"></div>
+        </div>
+    </div>
+
+    <script>
+        const rawTeas = [
+            "Peach Green Tea", "Peach Black Tea", "Strawberry Green Tea", "Strawberry Black Tea",
+            "Lychee Green Tea", "Lychee Black Tea", "Mango Green Tea", "Mango Black Tea",
+            "Honey Green Tea", "Honey Black Tea", "Pineapple Green Tea", "Pineapple Black Tea",
+            "Kiwi Green Tea", "Kiwi Black Tea", "Grapefruit Green Tea", "Grapefruit Black Tea",
+            "Winter Melon Tea", "Winter Melon Milk Tea", "Kumquat Tea", "Top Fruit Tea",
+            "Kumquat Lemon", "Signature Milk Tea", "Jasmine Green Milk Tea", "Oolong Milk Tea",
+            "Taro Milk Tea", "Thai Milk Tea", "Matcha Milk Tea", "Chocolate Milk Tea", "Honey Milk Tea",
+            "Strawberry Milk Tea", "Lychee Milk Tea", "Winter Melon Milk Tea", "Peach Milk Tea",
+            "Mango Milk Tea", "Passion Fruit Milk Tea", "Brown Sugar Milk Tea", "Hazelnut Milk Tea",
+            "Vanilla Milk Tea", "Hokkaido Black Tea", "Hokkaido Oolong Tea"
+        ];
+
+        const rawToppings = [
+            "Golden Boba", "Coconut Jelly", "Grass Jelly", "Coffee Jelly", "Rainbow Jelly",
+            "Star Jelly", "Egg Pudding", "Sea Cream", "Red Bean", "Crystal Boba", "Aloe Vera",
+            "No Topping"
+        ];
+
+        let activeTeas = [...rawTeas];
+        let activeToppings = [...rawToppings];
+        let isCaffeineFree = false;
+
+        const triggerZone = document.getElementById('interactive-trigger');
+        const teaWheel = document.getElementById('tea-wheel');
+        const toppingWheel = document.getElementById('topping-wheel');
+        const caffeineToggle = document.getElementById('caffeine-toggle');
+        const quickDrawBtn = document.getElementById('quick-draw-btn');
+        const screenStatus = document.getElementById('screen-status');
+        const screenOutput = document.getElementById('screen-output');
+        const timerDiv = document.getElementById('timer');
+
+        function drawWheel(canvasId, items, colors, isOuter) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const size = isOuter ? 600 : 336; 
+            canvas.width = size;
+            canvas.height = size;
+            
+            const numSegments = items.length;
+            const angle = (2 * Math.PI) / numSegments;
+            const center = size / 2;
+
+            for (let i = 0; i < numSegments; i++) {
+                ctx.beginPath();
+                ctx.moveTo(center, center);
+                ctx.arc(center, center, center, i * angle, (i + 1) * angle);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#4a2c2a';
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(center, center);
+                ctx.rotate(i * angle + angle / 2);
+                ctx.fillStyle = '#4a2c2a';
+                
+                if (isOuter) {
+                    ctx.font = 'bold 11px Courier New';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(items[i], center - 12, 4);
+                } else {
+                    ctx.font = 'bold 10px Courier New';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(items[i], center - 8, 3);
+                }
+                ctx.restore();
+            }
+        }
+
+        const teaColors = ['#ffd166', '#f4a261', '#e76f51', '#f28482', '#f7b2bd'];
+        const toppingColors = ['#06d6a0', '#118ab2', '#a8dadc', '#83c5be', '#4ea8de'];
+
+        function refreshWheelGraphics() {
+            drawWheel('canvas-tea', activeTeas, teaColors, true);
+            drawWheel('canvas-topping', activeToppings, toppingColors, false);
+        }
+
+        let isSystemLocked = false;
+        let isActivelySpinning = false;
+        
+        let teaCurrentDegree = Math.floor(Math.random() * 360);
+        let toppingCurrentDegree = Math.floor(Math.random() * 360);
+
+        let animationFrameId = null;
+        let lockTimerInterval = null;
+
+        function processIdleRotation() {
+            if (!isActivelySpinning) {
+                teaCurrentDegree += 0.12; 
+                toppingCurrentDegree -= 0.08;
+
+                if (teaCurrentDegree >= 360) teaCurrentDegree -= 360;
+                if (toppingCurrentDegree <= -360) toppingCurrentDegree += 360;
+
+                teaWheel.style.transform = `rotate(${teaCurrentDegree}deg)`;
+                toppingWheel.style.transform = `rotate(${toppingCurrentDegree}deg)`;
+            }
+            animationFrameId = requestAnimationFrame(processIdleRotation);
+        }
+
+        function checkLockStatus() {
+            const lockExpiry = localStorage.getItem('boba_oracle_lock');
+            if (lockExpiry) {
+                const timeLeft = parseInt(lockExpiry) - Date.now();
+                if (timeLeft > 0) {
+                    setMachineLockedState();
+                    const savedDrink = localStorage.getItem('boba_oracle_drink') || "Your Liquid Destiny";
+                    screenOutput.innerHTML = `Assigned order:<br><span style="color:#ffd166">${savedDrink}</span>`;
+                    startCountdown();
+                } else {
+                    clearLock();
+                }
+            } else {
+                processIdleRotation();
+            }
+        }
+
+        function setMachineLockedState() {
+            isSystemLocked = true;
+            triggerZone.classList.add('disabled');
+            caffeineToggle.disabled = true;
+            quickDrawBtn.disabled = true;
+            screenStatus.innerText = "WHEEL LOCKED";
+        }
+
+        function startCountdown() {
+            clearInterval(lockTimerInterval);
+            function updateTimer() {
+                const remaining = parseInt(localStorage.getItem('boba_oracle_lock')) - Date.now();
+                if (remaining <= 0) {
+                    clearLock();
+                } else {
+                    const minutes = Math.floor(remaining / 60000);
+                    const seconds = Math.floor((remaining % 60000) / 1000);
+                    timerDiv.innerText = `System Lock: ${minutes}m ${seconds}s`;
+                }
+            }
+            updateTimer();
+            lockTimerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function clearLock() {
+            clearInterval(lockTimerInterval);
+            localStorage.removeItem('boba_oracle_lock');
+            localStorage.removeItem('boba_oracle_drink');
+            isSystemLocked = false;
+            triggerZone.classList.remove('disabled');
+            caffeineToggle.disabled = false;
+            quickDrawBtn.disabled = false;
+            timerDiv.innerText = "";
+            screenStatus.innerText = "Wheel Status: Online";
+            screenOutput.innerText = "System ready. Tap wheel to spin.";
+            
+            if(animationFrameId) cancelAnimationFrame(animationFrameId);
+            processIdleRotation();
+        }
+
+        caffeineToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            if (isSystemLocked || isActivelySpinning) return;
+
+            isCaffeineFree = !isCaffeineFree;
+            
+            if (isCaffeineFree) {
+                caffeineToggle.innerText = "Limit Caffeine: ON";
+                caffeineToggle.classList.add('active');
+                
+                activeTeas = rawTeas.filter(tea => 
+                    !tea.includes("Black") && 
+                    !tea.includes("Green") && 
+                    !tea.includes("Oolong") && 
+                    !tea.includes("Thai") && 
+                    !tea.includes("Matcha")
+                );
+                activeToppings = rawToppings.filter(top => !top.includes("Coffee"));
+            } else {
+                caffeineToggle.innerText = "Limit Caffeine: OFF";
+                caffeineToggle.classList.remove('active');
+                activeTeas = [...rawTeas];
+                activeToppings = [...rawToppings];
+            }
+
+            refreshWheelGraphics();
+        });
+
+        // Function to extract which item is pointing directly to the top marker (270 degrees)
+        function getResultFromAngle(currentRotationAngle, items, isClockwise) {
+            // Normalize degrees to clean positive system bounds [0, 360)
+            let normalizedRotation = currentRotationAngle % 360;
+            if (normalizedRotation < 0) normalizedRotation += 360;
+
+            // Pointer marker points down from the absolute top center position (270 degrees)
+            let pointerTargetAngle = 270 - normalizedRotation;
+            if (pointerTargetAngle < 0) pointerTargetAngle += 360;
+
+            const segmentSize = 360 / items.length;
+            let finalSelectedIndex = Math.floor(pointerTargetAngle / segmentSize);
+            
+            // Boundary safety configurations
+            if (finalSelectedIndex >= items.length) finalSelectedIndex = items.length - 1;
+            if (finalSelectedIndex < 0) finalSelectedIndex = 0;
+
+            return items[finalSelectedIndex];
+        }
+
+        // Logic shared to save assignments inside local storage memory
+        function processDrinkAssignment(tea, topping) {
+            const finalDrinkStr = `${tea} + ${topping}`;
+            screenStatus.innerText = "TRANSMISSION COMPLETE";
+            screenOutput.innerHTML = `Your Order:<br><span style="color:#ffd166">${finalDrinkStr}</span>`;
+
+            const halfHourLock = Date.now() + (30 * 60 * 1000);
+            localStorage.setItem('boba_oracle_lock', halfHourLock);
+            localStorage.setItem('boba_oracle_drink', finalDrinkStr);
+            
+            setMachineLockedState();
+            startCountdown();
+        }
+
+        // Quick Draw Button Interaction Logic
+        quickDrawBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isSystemLocked || isActivelySpinning) return;
+
+            cancelAnimationFrame(animationFrameId);
+            
+            // Randomly flash wheels to new absolute points completely instantaneously
+            teaCurrentDegree = Math.floor(Math.random() * 360);
+            toppingCurrentDegree = Math.floor(Math.random() * 360);
+            
+            teaWheel.style.transform = `rotate(${teaCurrentDegree}deg)`;
+            toppingWheel.style.transform = `rotate(${toppingCurrentDegree}deg)`;
+
+            const wonTea = getResultFromAngle(teaCurrentDegree, activeTeas, true);
+            const wonTopping = getResultFromAngle(toppingCurrentDegree, activeToppings, false);
+
+            processDrinkAssignment(wonTea, wonTopping);
+        });
+
+        // Standard Interaction Click Sequence
+        triggerZone.addEventListener('click', () => {
+            if (isSystemLocked || isActivelySpinning) return;
+
+            isActivelySpinning = true;
+            cancelAnimationFrame(animationFrameId);
+
+            screenStatus.innerText = "PROCESSING SELECTION";
+            screenOutput.innerText = "Phase 1: Selecting Tea Flavor Base...";
+
+            teaWheel.classList.add('spinning-tea');
+            toppingWheel.classList.add('spinning-topping');
+
+            // Add dynamic multi-spin offsets safely relative to the random current drift position
+            const extraTeaRotations = (4 + Math.random() * 3) * 360; 
+            const extraToppingRotations = (4 + Math.random() * 3) * 360;
+
+            const teaFinalTarget = teaCurrentDegree + extraTeaRotations;
+            const toppingFinalTarget = toppingCurrentDegree - extraToppingRotations;
+
+            teaWheel.style.transform = `rotate(${teaFinalTarget}deg)`;
+            
+            setTimeout(() => {
+                screenStatus.innerText = "PROCESSING TEXTURE";
+                screenOutput.innerText = "Phase 2: Calculating Topping Matrix...";
+                toppingWheel.style.transform = `rotate(${toppingFinalTarget}deg)`;
+            }, 900);
+
+            setTimeout(() => {
+                // Update tracker variables directly to matching final physics landing states
+                teaCurrentDegree = teaFinalTarget;
+                toppingCurrentDegree = toppingFinalTarget;
+
+                // Identify exactly what slice landed underneath the pointer
+                const wonTea = getResultFromAngle(teaCurrentDegree, activeTeas, true);
+                const wonTopping = getResultFromAngle(toppingCurrentDegree, activeToppings, false);
+
+                // Strip transition animations off to prevent drift snapping bugs later
+                teaWheel.classList.remove('spinning-tea');
+                toppingWheel.classList.remove('spinning-topping');
+                
+                // Re-apply static assignments explicitly
+                teaWheel.style.transform = `rotate(${teaCurrentDegree % 360}deg)`;
+                toppingWheel.style.transform = `rotate(${toppingCurrentDegree % 360}deg)`;
+
+                isActivelySpinning = false;
+                processDrinkAssignment(wonTea, wonTopping);
+            }, 4200);
+        });
+
+        // Bootstrap launch sequence
+        refreshWheelGraphics();
+        checkLockStatus();
+    </script>
+</body>
+</html>

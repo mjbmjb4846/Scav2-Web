@@ -134,6 +134,12 @@ input[type="text"]:focus { border-bottom-color: var(--accent); }
     box-shadow: 2px 2px 0 var(--border); font-size: 0.9em;
     font-family: 'Special Elite', monospace;
 }
+.map-marker.start-location {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+    box-shadow: 2px 2px 0 #1f5b37;
+}
 .map-marker.claimed { border-color: var(--green); color: var(--green); background: #eef7f1; }
 .map-marker.exhausted { border-color: var(--accent); background: #fdf0f0; opacity: 0.7; }
 .map-marker.blacklisted { border-color: #666; background: #eee; opacity: 0.5; color: #666; }

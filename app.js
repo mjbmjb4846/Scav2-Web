@@ -1,5 +1,6 @@
 // Intelligently targets localhost if opened locally, or relative API paths in prod
 const API_URL = "https://game.elso.win/api";
+const START_LOCATION = { lat: 42.72611888883718, lng: -84.477101659417 };
 let token = localStorage.getItem('scav_token');
 let allChallenges = [];
 
@@ -126,6 +127,32 @@ async function checkGameOver(state) {
     } else {
         podiumPanel.classList.add('hidden');
     }
+}
+
+function renderStartLocationMarker() {
+    if (!map) return;
+
+    if (startLocationMarker) {
+        startLocationMarker.remove();
+    }
+
+    const el = document.createElement('div');
+    el.className = 'map-marker start-location';
+    el.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%; font-size:0.72em; line-height:1;">START</div>';
+    el.style.width = '42px';
+    el.style.height = '42px';
+
+    const popup = new maplibregl.Popup({ offset: 15 }).setHTML(`
+        <div style="text-align:center;">
+            <h3 style="margin:0 0 5px 0;">Start Location</h3>
+            <p style="margin:0; font-size:0.9em;">Initial meet-up point.</p>
+        </div>
+    `);
+
+    startLocationMarker = new maplibregl.Marker({ element: el })
+        .setLngLat([START_LOCATION.lng, START_LOCATION.lat])
+        .setPopup(popup)
+        .addTo(map);
 }
 
 async function loadTeamInfo() {
@@ -360,7 +387,7 @@ async function adminCreateChallenge() {
 // Modal Logic
 function openClaimModal(id, category, name) {
     document.getElementById('claimChallengeId').value = id;
-    document.getElementById('claimModalDesc').innerText = `Proving: ${name}`;
+    document.getElementById('claimModalDesc').innerHTML = `Proving: ${name}`;
     const req = ['photo', 'video'].includes(category.toLowerCase());
     const mc = document.getElementById('mediaInputContainer');
     if (req) mc.classList.remove('hidden'); else mc.classList.add('hidden');
@@ -444,6 +471,7 @@ setInterval(() => { if (token || localStorage.getItem('scav_team') === 'admin0')
 
 let map = null;
 let currentMarkers = [];
+let startLocationMarker = null;
 let isMapVisible = false;
 let pmtilesProtocolAdded = false;
 let pmtilesInstance = null;
@@ -514,6 +542,7 @@ function initMap() {
         });
 
         map.on('load', () => {
+            renderStartLocationMarker();
             renderMapMarkers();
         });
     }).catch(err => console.error("Error loading PMTiles header:", err));
@@ -521,6 +550,8 @@ function initMap() {
 
 function renderMapMarkers() {
     if (!map) return;
+
+    renderStartLocationMarker();
     
     // Clear existing markers from the map
     currentMarkers.forEach(m => m.remove());
@@ -551,7 +582,7 @@ function renderMapMarkers() {
 
             let claimBtn = '';
             if (token && !c.claimed_by_team && !c.blacklisted_by_team && c.remaining !== 0) {
-                claimBtn = `<button onclick="openClaimModal(${c.id}, '${c.category}', '${c.name.replace(/'/g, "\\'")}')" style="padding: 4px 8px; font-size: 0.8em; margin-top:10px;">Claim</button>`;
+                claimBtn = `<button onclick='openClaimModal(${c.id}, ${JSON.stringify(c.category)}, ${JSON.stringify(c.name)})' style="padding: 4px 8px; font-size: 0.8em; margin-top:10px;">Claim</button>`;
                 claimBtn += `<button onclick="addInventory(${c.id})" style="padding: 4px 8px; font-size: 0.8em; margin-top:10px;">Stow</button>`;
             }
 
